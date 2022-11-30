@@ -16,8 +16,8 @@ router.post("/add-many", async (req, res) => {
       _id: nft.token_id,
     };
   });
-  const result = await db.collection("nfts").insertMany(nftsToAdd);
+  const result = await db().collection("nfts").insertMany(nftsToAdd);
   res.send(result);
-})
+});
 
 module.exports = router;
