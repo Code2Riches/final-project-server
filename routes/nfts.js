@@ -13,11 +13,45 @@ router.post("/add-many", async (req, res) => {
   const nftsToAdd = nfts.map((nft) => {
     return {
       ...nft,
-      _id: nft.token_id,
+      _id: uuid(),
     };
   });
   const result = await db().collection("nfts").insertMany(nftsToAdd);
-  res.send(result);
+  res.json({
+    success: true,
+    message: "NFTs added successfully",
+    result,
+  });
+});
+
+router.get("/all", async (req, res) => {
+  const result = await db().collection("nfts").find().toArray();
+  res.json({
+    success: true,
+    message: "NFTs fetched successfully",
+    result,
+  });
+});
+
+router.get("/get-collection/:collection", async (req, res) => {
+  try {
+    const collectionParam = req.params.collection;
+    const result = await db()
+      .collection("nfts")
+      .find({ "collection.name": collectionParam })
+      .toArray();
+    res.json({
+      success: true,
+      message: "NFTs fetched successfully",
+      result,
+    });
+  } catch (err) {
+    console.log(err);
+    res.json({
+      success: false,
+      error: err.toString(),
+    });
+  }
 });
 
 module.exports = router;
