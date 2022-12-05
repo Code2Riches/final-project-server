@@ -54,4 +54,22 @@ router.get("/get-collection/:collection", async (req, res) => {
   }
 });
 
+router.get("/get-by-id/:id", async (req, res) => {
+  try {
+    const idParam = req.params.id;
+    const result = await db().collection("nfts").findOne({ _id: idParam });
+    res.json({
+      success: true,
+      message: "NFT fetched successfully",
+      result,
+    });
+  } catch (err) {
+    console.log(err);
+    res.json({
+      success: false,
+      error: err.toString(),
+    });
+  }
+});
+
 module.exports = router;
