@@ -93,6 +93,7 @@ router.post("/login", async (req, res) => {
       success: true,
       token,
       email,
+      avatar: user.avatar,
     });
   } catch (err) {
     console.log(err);
