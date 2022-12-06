@@ -14,7 +14,7 @@ router.post("/register", async (req, res, next) => {
   try {
     const email = req.body.email;
     const password = req.body.password;
-    const userSpend = email.includes("codeimmersives.com") ? 1000 : 0;
+    const userSpend = email.includes("codeimmersives.com") ? 1000 : 250;
     const saltRounds = 5; // For prod apps, saltRounds are going to be between 5 and 10
     const salt = await bcrypt.genSalt(saltRounds);
     const hash = await bcrypt.hash(password, salt);
@@ -24,6 +24,12 @@ router.post("/register", async (req, res, next) => {
       password: hash,
       id: uuid(),
       coin: userSpend,
+      avatar: "",
+      firstName:"",
+      lastName:"",
+      cartHistory: [],
+      cart: [],
+
     };
 
     const result = await db().collection("users").insertOne(user);
@@ -137,6 +143,42 @@ router.get("/message", async (req, res) => {
       error: err.toString(),
     });
   }
+});
+
+router.put("/update-profile", async (req, res) => {
+  const firstName = req.body.firstName;
+  const lastName = req.body.lastName;
+  const avatar = req.body.avatar;
+  const email = req.body.email;
+
+
+  const updatedUser = {
+    ...user,
+    firstName,
+    lastName,
+    avatar,
+
+  }
+  const result = await db()
+      .collection("users")
+      .updateOne({ email: email  }, { $set: updatedUser });
+
+});
+
+router.put("/update-cart", async (req, res) => {
+  const email = req.body.email;
+  const cart = req.body.cart;
+  const result = await db()
+    .collection("users")
+    .updateOne({ email: email }, { $set: { cart: cart } });
+});
+
+router.put("/update-cart-history", async (req, res) => {
+  const email = req.body.email;
+  const cartHistory = req.body.cartHistory;
+  const result = await db()
+    .collection("users")
+    .updateOne({ email: email }, { $set: { cartHistory: cart } }, {$set: {cart: []}});
 });
 
 module.exports = router;
