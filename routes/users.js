@@ -94,6 +94,11 @@ router.post("/login", async (req, res) => {
       token,
       email,
       avatar: user.avatar,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      coin: user.coin,
+      cart: user.cart,
+      cartHistory: user.cartHistory,
     });
   } catch (err) {
     console.log(err);
