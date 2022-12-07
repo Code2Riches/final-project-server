@@ -14,7 +14,7 @@ router.post("/register", async (req, res, next) => {
   try {
     const email = req.body.email;
     const password = req.body.password;
-    const userSpend = email.includes("codeimmersives.com") ? 1000 : 0;
+    const userSpend = email.includes("codeimmersives.com") ? 1000 : 250;
     const saltRounds = 5; // For prod apps, saltRounds are going to be between 5 and 10
     const salt = await bcrypt.genSalt(saltRounds);
     const hash = await bcrypt.hash(password, salt);
@@ -24,6 +24,11 @@ router.post("/register", async (req, res, next) => {
       password: hash,
       id: uuid(),
       coin: userSpend,
+      avatar: "",
+      firstName: "",
+      lastName: "",
+      cartHistory: [],
+      cart: [],
     };
 
     const result = await db().collection("users").insertOne(user);
@@ -94,6 +99,11 @@ router.post("/login", async (req, res) => {
       token,
       email,
       avatar: user.avatar,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      coin: user.coin,
+      cart: user.cart,
+      cartHistory: user.cartHistory,
     });
   } catch (err) {
     console.log(err);
@@ -131,6 +141,115 @@ router.get("/message", async (req, res) => {
       });
     }
     throw Error("Access Denied");
+  } catch (err) {
+    res.json({
+      success: false,
+      error: err.toString(),
+    });
+  }
+});
+
+router.get("/me", async (req, res) => {
+  const headerTokenKey = process.env.TOKEN_HEADER_KEY;
+  const token = req.header(headerTokenKey);
+  const secretKey = process.env.JWT_SECRET_KEY;
+  const decoded = jwt.verify(token, secretKey);
+  console.log(process.env.JWT_SECRET_KEY, headerTokenKey, token);
+  if (decoded) {
+    const user = await db()
+      .collection("users")
+      .findOne({ email: decoded.userData.email });
+    res.json({
+      success: true,
+      token,
+      email: user.email,
+      avatar: user.avatar,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      coin: user.coin,
+      cart: user.cart,
+      cartHistory: user.cartHistory,
+    });
+  }
+});
+
+router.put("/update-profile", async (req, res) => {
+  const firstName = req.body.firstName;
+  const lastName = req.body.lastName;
+  const avatar = req.body.avatar;
+  const email = req.body.email;
+  try {
+    const updatedUser = {
+      firstName,
+      lastName,
+      avatar,
+    };
+    const result = await db()
+      .collection("users")
+      .updateOne({ email: email }, { $set: updatedUser });
+
+    res.json({
+      success: true,
+      result,
+    });
+  } catch (err) {
+    res.json({
+      success: false,
+      error: err.toString(),
+    });
+  }
+});
+
+router.put("/update-cart", async (req, res) => {
+  const email = req.body.email;
+  const cart = req.body.cart;
+  try {
+    const result = await db()
+      .collection("users")
+      .updateOne({ email: email }, { $push: { cart: cart } });
+    res.json({
+      success: true,
+      result,
+    });
+  } catch (err) {
+    res.json({
+      success: false,
+      error: err.toString(),
+    });
+  }
+});
+
+router.put("/update-cart-history", async (req, res) => {
+  try {
+    const email = req.body.email;
+    const cart = req.body.cart;
+    const total = req.body.total;
+    const user = await db().collection("users").findOne({ email: email });
+    const cartObject = {
+      cart: cart,
+      user_id: user.id,
+      user_email: user.email,
+      total: total,
+      id: uuid(),
+    };
+    const checkoutOrder = await db()
+      .collection("cartorders")
+      .insertOne(cartObject);
+
+    const result = await db()
+      .collection("users")
+      .updateOne(
+        { email: email },
+        { $push: { cartHistory: checkoutOrder.id } },
+        { $set: { cart: [] } }
+      );
+
+    res.json({
+      success: true,
+      result,
+      checkoutOrder,
+      user,
+    });
   } catch (err) {
     res.json({
       success: false,
