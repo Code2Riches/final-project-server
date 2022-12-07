@@ -62,10 +62,8 @@ router.post("/login", async (req, res) => {
     }
 
     const storedPassword = user.password;
-    console.log(password, storedPassword);
 
     const isPasswordCorrect = await bcrypt.compare(password, storedPassword);
-    console.log(isPasswordCorrect);
 
     if (!isPasswordCorrect) {
       res
@@ -85,7 +83,6 @@ router.post("/login", async (req, res) => {
       email,
     };
     const secretKey = process.env.JWT_SECRET_KEY;
-    console.log(secretKey);
 
     const exp = Math.floor(Date.now() / 1000) + 60 * 60;
     const payload = {
@@ -154,7 +151,6 @@ router.get("/me", async (req, res) => {
   const token = req.header(headerTokenKey);
   const secretKey = process.env.JWT_SECRET_KEY;
   const decoded = jwt.verify(token, secretKey);
-  console.log(process.env.JWT_SECRET_KEY, headerTokenKey, token);
   if (decoded) {
     const user = await db()
       .collection("users")
@@ -178,12 +174,14 @@ router.put("/update-profile", async (req, res) => {
   const lastName = req.body.lastName;
   const avatar = req.body.avatar;
   const email = req.body.email;
+  console.log(req.body)
   try {
     const updatedUser = {
-      firstName,
+      firstName: req.body.firstName,
       lastName,
       avatar,
     };
+    console.log(updatedUser)
     const result = await db()
       .collection("users")
       .updateOne({ email: email }, { $set: updatedUser });
@@ -219,7 +217,7 @@ router.put("/update-cart", async (req, res) => {
   }
 });
 
-router.put("/update-cart-history", async (req, res) => {
+router.put("/checkout", async (req, res) => {
   try {
     const email = req.body.email;
     const cart = req.body.cart;
@@ -232,6 +230,11 @@ router.put("/update-cart-history", async (req, res) => {
       total: total,
       id: uuid(),
     };
+    // const manyNfts = await db().collection("nfts").find(_id: {$in: []});
+    const newNftOwner = await db()
+      .collection("nfts")
+      .updateMany({ _id: {$in: []} }, { $set: { owner: email } });
+
     const checkoutOrder = await db()
       .collection("cartorders")
       .insertOne(cartObject);
@@ -249,6 +252,28 @@ router.put("/update-cart-history", async (req, res) => {
       result,
       checkoutOrder,
       user,
+    });
+  } catch (err) {
+    res.json({
+      success: false,
+      error: err.toString(),
+    });
+  }
+});
+
+router.put("/update-coin", async (req, res) => {});
+
+router.put("/delete-cart-item", async (req, res) => {
+  const email = req.body.email;
+  console.log(req.body);
+  try {
+    // const nft = await db().collection("nfts").findOne({ _id: req.body.id });
+    const result = await db()
+      .collection("users")
+      .updateOne({ email: email }, { $pull: { cart: { _id: req.body._id } } });
+    res.json({
+      success: true,
+      result,
     });
   } catch (err) {
     res.json({
