@@ -178,12 +178,14 @@ router.put("/update-profile", async (req, res) => {
   const lastName = req.body.lastName;
   const avatar = req.body.avatar;
   const email = req.body.email;
+  console.log(req.body)
   try {
     const updatedUser = {
-      firstName,
+      firstName: req.body.firstName,
       lastName,
       avatar,
     };
+    console.log(updatedUser)
     const result = await db()
       .collection("users")
       .updateOne({ email: email }, { $set: updatedUser });
