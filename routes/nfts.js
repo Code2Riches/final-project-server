@@ -71,5 +71,22 @@ router.get("/get-by-id/:id", async (req, res) => {
     });
   }
 });
+router.delete("/delete/:id", async (req, res) => {
+  try {
+    const idParam = req.params.id;
+    const result = await db().collection("nfts").deleteOne({ _id: idParam });
+    res.json({
+      success: true,
+      message: "NFT deleted successfully",
+      result,
+    });
+  } catch (err) {
+    console.log(err);
+    res.json({
+      success: false,
+      error: err.toString(),
+    });
+  }
+});
 
 module.exports = router;
