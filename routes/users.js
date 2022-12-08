@@ -174,14 +174,14 @@ router.put("/update-profile", async (req, res) => {
   const lastName = req.body.lastName;
   const avatar = req.body.avatar;
   const email = req.body.email;
-  console.log(req.body)
+  console.log(req.body);
   try {
     const updatedUser = {
       firstName: req.body.firstName,
       lastName,
       avatar,
     };
-    console.log(updatedUser)
+    console.log(updatedUser);
     const result = await db()
       .collection("users")
       .updateOne({ email: email }, { $set: updatedUser });
@@ -222,6 +222,7 @@ router.put("/checkout", async (req, res) => {
     const email = req.body.email;
     const cart = req.body.cart;
     const total = req.body.total;
+    const ids = req.body.ids;
     const user = await db().collection("users").findOne({ email: email });
     const cartObject = {
       cart: cart,
@@ -233,7 +234,7 @@ router.put("/checkout", async (req, res) => {
     // const manyNfts = await db().collection("nfts").find(_id: {$in: []});
     const newNftOwner = await db()
       .collection("nfts")
-      .updateMany({ _id: {$in: []} }, { $set: { owner: email } });
+      .updateMany({ _id: { $in: ids } }, { $set: { owner: email } });
 
     const checkoutOrder = await db()
       .collection("cartorders")
@@ -243,10 +244,9 @@ router.put("/checkout", async (req, res) => {
       .collection("users")
       .updateOne(
         { email: email },
-        { $push: { cartHistory: checkoutOrder.id } },
-        { $set: { cart: [] } }
+        { $push: { cartHistory: cartObject.id }, $set: { cart: [], coin: numbers } }
       );
-
+    console.log(checkoutOrder);
     res.json({
       success: true,
       result,
