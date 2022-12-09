@@ -76,6 +76,11 @@ router.post("/login", async (req, res) => {
     }
     const userPerms = email.includes("codeimmersives.com") ? "admin" : "user";
 
+    const cartHistory = await db()
+      .collection("cartorders")
+      .find({ user_email: decoded.userData.email })
+      .toArray();
+
     const userData = {
       date: new Date(),
       userId: user.id,
@@ -100,7 +105,7 @@ router.post("/login", async (req, res) => {
       lastName: user.lastName,
       coin: user.coin,
       cart: user.cart,
-      cartHistory: user.cartHistory,
+      cartHistory: cartHistory,
     });
   } catch (err) {
     console.log(err);
@@ -155,6 +160,11 @@ router.get("/me", async (req, res) => {
     const user = await db()
       .collection("users")
       .findOne({ email: decoded.userData.email });
+
+    const cartHistory = await db()
+      .collection("cartorders")
+      .find({ user_email: decoded.userData.email })
+      .toArray();
     res.json({
       success: true,
       token,
@@ -164,8 +174,9 @@ router.get("/me", async (req, res) => {
       lastName: user.lastName,
       coin: user.coin,
       cart: user.cart,
-      cartHistory: user.cartHistory,
+      cartHistory: cartHistory,
     });
+    console.log("carthistory", cartHistory);
   }
 });
 
@@ -223,6 +234,7 @@ router.put("/checkout", async (req, res) => {
     const cart = req.body.cart;
     const total = req.body.total;
     const ids = req.body.ids;
+    const balance = req.body.balance;
     const user = await db().collection("users").findOne({ email: email });
     const cartObject = {
       cart: cart,
@@ -230,6 +242,7 @@ router.put("/checkout", async (req, res) => {
       user_email: user.email,
       total: total,
       id: uuid(),
+      purchaseDate: new Date(),
     };
     // const manyNfts = await db().collection("nfts").find(_id: {$in: []});
     const newNftOwner = await db()
@@ -244,7 +257,10 @@ router.put("/checkout", async (req, res) => {
       .collection("users")
       .updateOne(
         { email: email },
-        { $push: { cartHistory: cartObject.id }, $set: { cart: [], coin: numbers } }
+        {
+          $push: { cartHistory: cartObject.id },
+          $set: { cart: [], coin: balance },
+        }
       );
     console.log(checkoutOrder);
     res.json({
