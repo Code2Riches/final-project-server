@@ -50,6 +50,7 @@ router.post("/login", async (req, res) => {
   try {
     const email = req.body.email;
     const password = req.body.password;
+
     const user = await db().collection("users").findOne({ email });
     if (!user) {
       res
@@ -76,11 +77,6 @@ router.post("/login", async (req, res) => {
     }
     const userPerms = email.includes("codeimmersives.com") ? "admin" : "user";
 
-    const cartHistory = await db()
-      .collection("cartorders")
-      .find({ user_email: decoded.userData.email })
-      .toArray();
-
     const userData = {
       date: new Date(),
       userId: user.id,
@@ -95,6 +91,12 @@ router.post("/login", async (req, res) => {
       exp,
     };
     const token = jwt.sign(payload, secretKey);
+    const decoded = jwt.verify(token, secretKey);
+
+    const cartHistory = await db()
+      .collection("cartorders")
+      .find({ user_email: decoded.userData.email })
+      .toArray();
 
     res.json({
       success: true,
@@ -247,7 +249,7 @@ router.put("/checkout", async (req, res) => {
     // const manyNfts = await db().collection("nfts").find(_id: {$in: []});
     const newNftOwner = await db()
       .collection("nfts")
-      .updateMany({ _id: { $in: ids } }, { $set: { owner: email } });
+      .updateMany({ _id: { $in: ids } }, { $set: { owner: email, coin: 0 } });
 
     const checkoutOrder = await db()
       .collection("cartorders")
