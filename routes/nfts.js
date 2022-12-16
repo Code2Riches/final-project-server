@@ -60,6 +60,28 @@ router.get("/get-collection/:collection", async (req, res) => {
   }
 });
 
+router.get("/get-owner/:owner", async (req, res) => {
+  try {
+    const ownerParam = req.params.owner;
+    const result = await db()
+      .collection("nfts")
+      .find({ owner: ownerParam })
+      .toArray();
+    console.log("result ", result);
+    res.json({
+      success: true,
+      message: "NFTs fetched successfully",
+      result,
+    });
+  } catch (err) {
+    console.log(err);
+    res.json({
+      success: false,
+      error: err.toString(),
+    });
+  }
+});
+
 router.get("/get-by-id/:id", async (req, res) => {
   try {
     const idParam = req.params.id;
