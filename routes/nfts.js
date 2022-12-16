@@ -26,6 +26,12 @@ router.post("/add-many", async (req, res) => {
 
 router.get("/all", async (req, res) => {
   const result = await db().collection("nfts").find().toArray();
+  const newResult = result.map((nft) => {
+    if (nft.coin === 0) {
+      nft.coin = 50;
+    }
+    return nft;
+  });
   res.json({
     success: true,
     message: "NFTs fetched successfully",

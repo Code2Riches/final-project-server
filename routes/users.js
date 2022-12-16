@@ -249,7 +249,7 @@ router.put("/checkout", async (req, res) => {
     // const manyNfts = await db().collection("nfts").find(_id: {$in: []});
     const newNftOwner = await db()
       .collection("nfts")
-      .updateMany({ _id: { $in: ids } }, { $set: { owner: email, coin: 0 } });
+      .updateMany({ _id: { $in: ids } }, { $set: { owner: email, coin: 50 } });
 
     const checkoutOrder = await db()
       .collection("cartorders")
