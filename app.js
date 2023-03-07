@@ -23,7 +23,7 @@ app.use(
     allowedHeaders: process.env.TOKEN_HEADER_KEY,
   })
 );
-// app.options("*", cors());
+app.options("*", cors());
 
 // view engine setup
 app.set("views", path.join(__dirname, "views"));
