@@ -19,6 +19,7 @@ app.use(
     allowedHeaders: process.env.TOKEN_HEADER_KEY,
     methods: ["GET", "PUT", "POST", "DELETE"],
     preflightContinue: false,
+    credentials: true,
   })
 );
 app.options("*", cors());
