@@ -7,10 +7,6 @@ const cors = require("cors");
 
 require("dotenv").config();
 
-var indexRouter = require("./routes/index");
-var usersRouter = require("./routes/users");
-var nftsRouter = require("./routes/nfts");
-
 var { mongoConnect } = require("./mongo.js");
 mongoConnect();
 
@@ -25,6 +21,9 @@ app.use(
 );
 app.options("*", cors());
 
+var indexRouter = require("./routes/index");
+var usersRouter = require("./routes/users");
+var nftsRouter = require("./routes/nfts");
 // view engine setup
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "ejs");
