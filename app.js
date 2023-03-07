@@ -21,7 +21,7 @@ app.use(
     origin: process.env.CORS_ORIGIN,
   })
 );
-app.options("*", cors());
+// app.options("*", cors());
 
 // view engine setup
 app.set("views", path.join(__dirname, "views"));
