@@ -157,6 +157,7 @@ router.get("/me", async (req, res) => {
   const headerTokenKey = process.env.TOKEN_HEADER_KEY;
   const token = req.header(headerTokenKey);
   const secretKey = process.env.JWT_SECRET_KEY;
+  console.log (req.header)
   console.log(token, secretKey);
   const decoded = jwt.verify(token, secretKey);
   if (decoded) {
