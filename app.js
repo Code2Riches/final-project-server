@@ -20,6 +20,7 @@ app.use(
   cors({
     origin: process.env.CORS_ORIGIN,
     exposedHeaders: process.env.TOKEN_HEADER_KEY,
+    allowedHeaders: process.env.TOKEN_HEADER_KEY,
   })
 );
 // app.options("*", cors());
